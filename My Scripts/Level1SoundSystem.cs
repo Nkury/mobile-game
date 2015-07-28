@@ -7,11 +7,10 @@ public class Level1SoundSystem : MonoBehaviour {
 	private AudioSource enemyDeathJingle;
 	private AudioSource ouch;
 	private AudioSource level1_1;
-	private AudioSource level1_2;
-	private AudioSource level1_3;
-	private AudioSource level1_4;
-	private AudioSource level1_5;
 	private AudioSource coin_rush;
+	private AudioSource boss_entrance;
+	private AudioSource boss_music;
+	private AudioSource mission_complete;
 	private GameObject AIManager;
 	// Use this for initialization
 	void Start () {
@@ -21,13 +20,16 @@ public class Level1SoundSystem : MonoBehaviour {
 		enemyDeathJingle = audios [1];
 		ouch = audios [2];
 		level1_1 = audios [3];
-		level1_2 = audios [4];
-		level1_3 = audios [5];
-		level1_4 = audios [6];
-		level1_5 = audios [7];
-		coin_rush = audios [8];
+		coin_rush = audios [4];
+		boss_entrance = audios [5];
+		boss_music = audios [6];
+		mission_complete = audios [7];
 	}
+
+	void Update(){
 	
+	}
+
 	void GotCoin(){
 		coinJingle.Play ();
 	}
@@ -40,62 +42,25 @@ public class Level1SoundSystem : MonoBehaviour {
 		ouch.Play ();
 	}
 
-	void beatPhase1(){
+	void startBoss(){
 		level1_1.mute = true;
-		level1_2.mute = false;
+		boss_music.Play ();
 	}
 
-	void beatPhase2(){
-		level1_2.mute = true;
-		level1_3.mute = false;
+	void BossEntrance(){
+		level1_1.mute = true;
+		boss_entrance.Play ();
 	}
-
-	void beatPhase3(){
-		level1_3.mute = true;
-		level1_4.mute = false;
-	}
-
-	void beatPhase4(){
-		level1_4.mute = true;
-		level1_5.mute = false;
-	}
-
 	IEnumerator coinRush(){
-		if (!level1_1.mute) {
 			level1_1.mute = true;
 			coin_rush.Play ();
 			AIManager.SendMessage("toggleCoinRush");
 			yield return new WaitForSeconds(15);
 			level1_1.mute = false;
 			AIManager.SendMessage("toggleCoinRush");
-		} else if (!level1_2.mute) {
-			level1_2.mute = true;
-			coin_rush.Play ();
-			AIManager.SendMessage("toggleCoinRush");
-			yield return new WaitForSeconds(15);
-			level1_2.mute = false;
-			AIManager.SendMessage("toggleCoinRush");
-		} else if (!level1_3.mute) {
-			level1_3.mute = true;
-			coin_rush.Play ();
-			AIManager.SendMessage("toggleCoinRush");
-			yield return new WaitForSeconds(15);
-			level1_3.mute = false;
-			AIManager.SendMessage("toggleCoinRush");
-		} else if (!level1_4.mute) {
-			level1_4.mute = true;
-			coin_rush.Play ();
-			AIManager.SendMessage("toggleCoinRush");
-			yield return new WaitForSeconds(15);
-			level1_4.mute = false;
-			AIManager.SendMessage("toggleCoinRush");
-		} else if (!level1_5.mute) {
-			level1_5.mute = true;
-			coin_rush.Play ();
-			AIManager.SendMessage("toggleCoinRush");
-			yield return new WaitForSeconds(15);
-			level1_5.mute = false;
-			AIManager.SendMessage("toggleCoinRush");
-		}
+	}
+
+	void missionComplete(){
+		mission_complete.Play ();
 	}
 }

@@ -3,14 +3,15 @@ using System.Collections;
 
 public class ScoreManager : MonoBehaviour {
 
-	public float duration = 0.5f;
+	public float duration = 2;
 
 	public static int score = 0;
 	public static int money = 0;
-	private static int lifeScore;
+	public static int lifeScore;
 	private bool check = true;
 	private bool start = false;
 	private bool inc1 = false;
+	private bool dead = false;
 
 	public GameObject AIManage;
 	private GameObject player;
@@ -30,12 +31,24 @@ public class ScoreManager : MonoBehaviour {
 			player.SendMessage("GainLife");
 		}
 
-		if (check && start && inc1) {
-			check = false;
-			StartCoroutine (Increment1 (AIManage.GetComponent<AIManager>().num));
-		} else if (check && start && !inc1) {
-			check = false;
-			StartCoroutine (Increment2 (AIManage.GetComponent<AIManager>().num));
+		if (!dead) {
+			if (check && start && inc1) {
+				check = false;
+				StartCoroutine (Increment1 (AIManage.GetComponent<AIManager> ().num));
+			} else if (check && start && !inc1) {
+				check = false;
+				StartCoroutine (Increment2 (AIManage.GetComponent<AIManager> ().num));
+			}
+		} else if(dead && scoreLabel.transform.position.x < 1.7) {
+			Vector3 direction = Vector3.Normalize(new Vector3(1.9f,4,-3) - scoreLabel.transform.position);
+			scoreLabel.GetComponent<TextMesh>().fontSize += 2;
+			scoreLabel.transform.position += direction * Time.deltaTime * 10;
+		}
+
+		if (dead && moneyLabel.transform.position.x < 1.2) {
+			Vector3 direction = Vector3.Normalize(new Vector3(1.4f,4,-5.5f) - moneyLabel.transform.position);
+			moneyLabel.GetComponent<TextMesh>().fontSize += 2;
+			moneyLabel.transform.position += direction * Time.deltaTime * 10;
 		}
 
 		if(scoreLabel != null)
@@ -89,4 +102,34 @@ public class ScoreManager : MonoBehaviour {
 		money++;
 	}
 
+	void gameOver(){
+		int descent = score - ((score % 200) + 200);
+		if (descent < 0)
+			descent = 0;
+		dead = true;
+		StartCoroutine (CountTo(descent));
+		StartCoroutine (CountToMoney (money / 2));
+	}
+
+	IEnumerator CountTo (int target) {
+		yield return new WaitForSeconds (2);
+		int start = score;
+		for (float timer = 0; timer < duration; timer += Time.deltaTime) {
+			float progress = timer / duration;
+			score = (int)Mathf.Lerp (start, target, progress);
+			yield return null;
+		}
+		score = target;
+	}
+
+	IEnumerator CountToMoney (int target) {
+		yield return new WaitForSeconds (2);
+		int start = money;
+		for (float timer = 0; timer < duration; timer += Time.deltaTime) {
+			float progress = timer / duration;
+			money = (int)Mathf.Lerp (start, target, progress);
+			yield return null;
+		}
+		money = target;
+	}
 }

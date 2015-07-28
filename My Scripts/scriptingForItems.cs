@@ -30,7 +30,7 @@ public class scriptingForItems : MonoBehaviour {
 		                          (Screen.height / 2) - Screen.height / 4, Screen.width / 2,
 		                          Screen.height / 2));
 			GUI.Box (new Rect (0, 0, Screen.width / 2, Screen.height / 2),
-			         "EXTRA LIFE\nCost: $50.\n\n Grants player another heart for survival in\n the arena.\n\n\nInsufficient funds.");
+			         "EXTRA LIFE\nCost: $35.\n\n Grants player another heart for survival in\n the arena.\n\n\nInsufficient funds.");
 			if (GUI.Button (new Rect (120, 150, 150, 100), "OK")) {
 				insufficientFundsHearts = false;
 				player.SendMessage ("disableTalking");
@@ -69,7 +69,7 @@ public class scriptingForItems : MonoBehaviour {
 			                          (Screen.height / 2) - Screen.height / 4, Screen.width / 2,
 			                          Screen.height / 2));
 			GUI.Box (new Rect (0, 0, Screen.width / 2, Screen.height / 2),
-			         "HEART CONTAINER\nCost: $500.\n\n Increases the maximum amount of lives" +
+			         "HEART CONTAINER\nCost: $250.\n\n Increases the maximum amount of lives" +
 				" the player can have.\nCurrent maximum: " + SphereMovement.max_lives + 
 				"\n\n\nInsufficient funds.");
 			if (GUI.Button (new Rect (120, 150, 150, 100), "OK")) {
@@ -83,13 +83,13 @@ public class scriptingForItems : MonoBehaviour {
 			                          (Screen.height / 2) - Screen.height / 4, Screen.width / 2,
 			                          Screen.height / 2));
 			GUI.Box (new Rect (0, 0, Screen.width / 2, Screen.height / 2),
-			         "EXTRA LIFE\nCost: $50.\n\n Grants player another heart for survival in\n the arena.\n\n\n" +
+			         "EXTRA LIFE\nCost: $35.\n\n Grants player another heart for survival in\n the arena.\n\n\n" +
 				"Would you like to purchase?");
 	
 			if (GUI.Button (new Rect (120, 150, 75, 50), "YES")) {
 				buyExtraLife = false;
 				player.SendMessage ("GainLife");
-				ScoreManager.money -= 50;
+				ScoreManager.money -= 35;
 				player.SendMessage ("disableTalking");
 			}
 
@@ -169,7 +169,7 @@ public class scriptingForItems : MonoBehaviour {
 			                          (Screen.height / 2) - Screen.height / 4, Screen.width / 2,
 			                          Screen.height / 2));
 			GUI.Box (new Rect (0, 0, Screen.width / 2, Screen.height / 2),
-			         "HEART CONTAINER\nCost: $500.\n\n Increases the maximum amount of lives" +
+			         "HEART CONTAINER\nCost: $250.\n\n Increases the maximum amount of lives" +
 				" the player can have.\nCurrent maximum: " + SphereMovement.max_lives + 
 				"\n\n\nWould you like to purchase?");
 			
@@ -178,7 +178,7 @@ public class scriptingForItems : MonoBehaviour {
 				SphereMovement.max_lives++;
 				for (int i = SphereMovement.lives; i < SphereMovement.max_lives; i++)
 					player.SendMessage ("GainLife");
-				ScoreManager.money -= 500;
+				ScoreManager.money -= 250;
 				player.SendMessage ("disableTalking");
 			}
 			

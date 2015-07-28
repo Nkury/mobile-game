@@ -40,7 +40,7 @@ public class SafeZone : MonoBehaviour {
 		transform.Rotate (0, rotateSpeed * Time.deltaTime, 0, Space.World);
 
 		if (transform.localScale.x != 0 && transform.localScale.y != 0 && transform.localScale.z != 0 && 
-		    !startingUp && startShrink)
+		    !startingUp && startShrink && !SphereMovement.paused)
 			transform.localScale = new Vector3 (transform.localScale.x - .019f, transform.localScale.y, 
 		                                   transform.localScale.z - .019f);
 		else

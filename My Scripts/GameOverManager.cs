@@ -10,20 +10,31 @@ public class GameOverManager : MonoBehaviour {
 	public Font theFont;
 
 	void Start(){
-		AIManager.ph1on = true;
+		/*
+		if (AIManager.ph1on)
+			AIManager.ph1on = true;
+		else if (AIManager.ph2on) {
+			AIManager.ph1on = false;
+			AIManager.ph2on = true;
+		} else if (AIManager.ph3on) {
+			AIManager.ph1on = false;
+			AIManager.ph2on = false;
+			AIManager.ph3on = true;
+		}
 		AIManager.ph2on = false;
 		AIManager.ph3on = false;
 		AIManager.ph4on = false;
 		AIManager.ph5on = false;
+
 		AIManager.start1 = false;
 		AIManager.start2 = false;
 		AIManager.start3 = false;
 		AIManager.start4 = false;
 		AIManager.start5 = false;
-		ScoreManager.money = 0;
-		ScoreManager.score = 0;
+		AIManager.start6 = false;
+		*/
 		SphereMovement.lives = 3;
-		SphereMovement.max_lives = 5;
+		ScoreManager.lifeScore = 0;
 	}
 
 	void OnGUI(){

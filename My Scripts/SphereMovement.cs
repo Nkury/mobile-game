@@ -4,6 +4,7 @@ using UnityEngine.UI;
 
 public class SphereMovement : MonoBehaviour {
 
+	public static bool paused = true;
 	public float speed;
 	public bool can_jump;
 	public float gravity;
@@ -11,6 +12,7 @@ public class SphereMovement : MonoBehaviour {
 	public static int max_lives = 5;
 	private ParticleSystem explosion;
 	private GameObject soundSystem;
+	private GameObject scoreSystem;
 	//private ParticleSystem restartExplosion;
 	public GameObject life1;
 	public GameObject life2;
@@ -30,18 +32,54 @@ public class SphereMovement : MonoBehaviour {
 	public GameObject nuke;
 	public GameObject invinc;
 	public GameObject max_label;
-
+	private GameObject MissionSystem;
 	private GameObject AIManage;
 
 	void Start(){
 		soundSystem = GameObject.Find ("Sound System");
+		scoreSystem = GameObject.Find ("ScoreManager");
 		explosion = (ParticleSystem)Resources.Load ("prefabs/player_explosion", typeof(ParticleSystem));
 		AIManage = GameObject.Find ("AIManager");
+		MissionSystem = GameObject.Find ("MissionSystem");
 		//restartExplosion = (ParticleSystem)Resources.Load ("prefabs/restart_explosion", typeof(ParticleSystem));
 	}
 
 	void Update(){
 		interval += 1;
+
+		if (MissionSystem != null) {
+			if (!paused) {
+				Time.timeScale = 1;
+				MissionSystem.SetActive (false);
+			} else {
+				Time.timeScale = 0;
+				MissionSystem.SetActive (true);
+				foreach (Transform child in MissionSystem.transform) {
+					if (AIManager.mission1) {
+						if (child.name == "mission_obj1") {
+							child.GetComponent<Renderer> ().enabled = false;
+						}
+					}
+
+					if (AIManager.mission2) {
+						if (child.name == "mission_obj2") {
+							child.GetComponent<Renderer> ().enabled = false;
+						}
+					}
+
+					if (AIManager.mission3) {
+						if (child.name == "mission_obj3") {
+							child.GetComponent<Renderer> ().enabled = false;
+						}
+					}
+				}
+			}
+		}
+		if (Input.GetKeyDown("p")){
+			paused = !paused;
+		}
+
+
 
 		if (interval % 3 == 0 && invincible) {
 			GetComponent<Renderer> ().enabled = !GetComponent<Renderer> ().enabled;
@@ -139,79 +177,81 @@ public class SphereMovement : MonoBehaviour {
 	}
 
 	void OnCollisionEnter(Collision other){
-		if (other.gameObject.tag == "Enemy" && !invincible) {
+		if ((other.gameObject.tag == "Enemy" || other.gameObject.tag == "danger") && !invincible) {
 
 			if (lives != 1) {
-				 if (lives == 2) {
+				if (lives == 2) {
 					life2.SetActive (false);
 				} else if (lives == 3) {
 					life3.SetActive (false);
 				} else if (lives == 4) {
 					life4.SetActive (false);
-				}else if (lives == 5){
-					life5.SetActive(false);
+				} else if (lives == 5) {
+					life5.SetActive (false);
 				} else if (lives > 5) {
-					if(lives == 6){
-						life1.SetActive(true);
-						life2.SetActive(true);
-						life3.SetActive(true);
-						life4.SetActive(true);
-						life5.SetActive(true);
+					if (lives == 6) {
+						life1.SetActive (true);
+						life2.SetActive (true);
+						life3.SetActive (true);
+						life4.SetActive (true);
+						life5.SetActive (true);
 						lifemultiplier.SetActive (false);
-					}
-					else
-						lifemultiplier.GetComponent<Text>().text = "x " + (lives-1);
+					} else
+						lifemultiplier.GetComponent<Text> ().text = "x " + (lives - 1);
 				}
 
 				lives--;
-				if(lives < max_lives){
+				if (lives < max_lives) {
 					max_label.SetActive (false);
 				}
 				Restart ();
+			} else {
+				StartCoroutine (GameOver ());
 			}
-			else{
-				StartCoroutine (GameOver());
-			}
+		} else if (other.gameObject.tag == "hit") {
+			other.gameObject.transform.parent.SendMessage("DestroySelf");
 		}
 	}
 
 	void OnTriggerEnter(Collider other){
 		if (other.name == "abyss trigger") {
 
-			if (lives == 1) {
-				Application.LoadLevel("game over screen");
-			} else if (lives == 2) {
-				life2.SetActive (false);
-			} else if (lives == 3) {
-				life3.SetActive (false);
-			} else if (lives == 4) {
-				life4.SetActive (false);
-			} else if (lives == 5) {
-				life5.SetActive (false);
-			} else if (lives > 5) {
-				if (lives == 6) {
-					life1.SetActive (true);
-					life2.SetActive (true);
-					life3.SetActive (true);
-					life4.SetActive (true);
-					life5.SetActive (true);
-					lifemultiplier.SetActive (false);
-				} else
-					lifemultiplier.GetComponent<Text> ().text = "x " + (lives - 1);
+			if (lives != 1) {
+				if (lives == 2) {
+					life2.SetActive (false);
+				} else if (lives == 3) {
+					life3.SetActive (false);
+				} else if (lives == 4) {
+					life4.SetActive (false);
+				} else if (lives == 5) {
+					life5.SetActive (false);
+				} else if (lives > 5) {
+					if (lives == 6) {
+						life1.SetActive (true);
+						life2.SetActive (true);
+						life3.SetActive (true);
+						life4.SetActive (true);
+						life5.SetActive (true);
+						lifemultiplier.SetActive (false);
+					} else
+						lifemultiplier.GetComponent<Text> ().text = "x " + (lives - 1);
+				}
+				
+				lives--;
+				if (lives < max_lives) {
+					max_label.SetActive (false);
+				}
+				Restart ();
+			} else {
+				StartCoroutine (GameOver ());
 			}
-			
-			lives--;
-			if (lives < max_lives) {
-				max_label.SetActive (false);
-			}
-			Restart ();
 		} else if (other.tag == "coin" || other.tag == "coin_rush") {
 			other.SendMessage ("Collect");
 		} else if (other.name == "exit_trigger") {
 			scripting.SendMessage("ExitShop");
 		} else if (scripting != null){
 			if(other.tag == "item_heart") {
-				if(ScoreManager.money >= 50)
+				if(ScoreManager.money >= 35)
 					scripting.SendMessage ("enableBuyExtraLife");
 				else
 					scripting.SendMessage ("enableInsufficientHearts");
@@ -275,7 +315,7 @@ public class SphereMovement : MonoBehaviour {
 			life4.SetActive (false);
 			life5.SetActive (false);
 			lifemultiplier.SetActive (true);
-			lifemultiplier.GetComponent<Text>().text = "x " + (lives+1);
+			lifemultiplier.GetComponent<Text>().text = "x " + (lives);
 			lives++;
 		} else if (lives >= 5 && (lives + 1) > max_lives){
 
@@ -292,6 +332,7 @@ public class SphereMovement : MonoBehaviour {
 
 	IEnumerator GameOver(){
 		soundSystem.SendMessage ("Ouch");
+		scoreSystem.SendMessage ("gameOver");
 		Object expl = Instantiate (explosion, transform.position, Quaternion.identity);
 		Object expl2 = Instantiate (explosion, transform.position + new Vector3 (.1f, .1f, .1f), Quaternion.identity);
 		Object expl3 = Instantiate (explosion, transform.position - new Vector3 (.1f, .1f, .1f), Quaternion.identity);

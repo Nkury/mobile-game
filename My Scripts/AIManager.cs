@@ -5,6 +5,11 @@ public class AIManager : MonoBehaviour {
 
 	private int count = 0;
 
+	// missions
+	public static bool mission1 = false;
+	public static bool mission2 = false;
+	public static bool mission3 = false;
+
 	// spawnpoints 
 	public GameObject sp1;
 	public GameObject sp2;
@@ -17,14 +22,17 @@ public class AIManager : MonoBehaviour {
 	public GameObject ph3;
 	public GameObject ph4;
 	public GameObject ph5;
+	public GameObject boss_not;
 	public static bool ph1on = true;
 	public static bool ph2on = false;
 	public static bool ph3on = false;
 	public static bool ph4on = false;
 	public static bool ph5on = false;
+	public static bool boss = false;
 
 	public GameObject enemyPrefab;
 	public GameObject termitePrefab;
+	public GameObject bossPrefab;
 
 	// Safezone variables
 	public GameObject safeZonePrefab;
@@ -38,6 +46,7 @@ public class AIManager : MonoBehaviour {
 	public static bool start3 = false;
 	public static bool start4 = false;
 	public static bool start5 = false;
+	public static bool start6 = false;
 
 	public int num = 0;
 	private int randomChoice;
@@ -75,6 +84,7 @@ public class AIManager : MonoBehaviour {
 	public int Phase5Wave3Termites; // number of termites in wave 3
 
 	private bool getCoin = true;
+	private int moneyCheck;
 	private bool coin_rush = false;
 	public GameObject coinPrefab;
 	public GameObject coinRushPrefab;
@@ -85,6 +95,8 @@ public class AIManager : MonoBehaviour {
 	private GameObject soundPlayer;
 	private GameObject count_tens;
 	private GameObject count_ones;
+	private GameObject missionSystem;
+	private GameObject missionAcc;
 
 	// Use this for initialization
 	void Start () {
@@ -92,25 +104,27 @@ public class AIManager : MonoBehaviour {
 		soundPlayer = GameObject.Find ("Sound System");
 		count_tens = GameObject.Find ("counter_tens");
 		count_ones = GameObject.Find ("counter_ones");
+		missionSystem = GameObject.Find ("MissionSystem");
+		missionAcc = GameObject.Find ("mission_acc");
+		moneyCheck = ScoreManager.money;
 	}
 	
 	// Update is called once per frame
 	void Update () {
 
-		if (!is_safezone) {
+		if (!is_safezone && !boss) {
 			is_safezone = true;
 			generateSafeZone ();
 		}
 
-		generateCoins ();
+		if(!boss)
+			generateCoins ();
 
 		if (ph1on && start1) {
 
-			count_tens.GetComponent<TextMesh>().text = (Phase1Total / 10).ToString ();
-			count_ones.GetComponent<TextMesh>().text = (Phase1Total % 10).ToString ();
-
 			if(wave1start){
-				generateEnemy(Phase1Wave1);
+				player.GetComponent<HealthBar>().setSpeed (Phase1Total);
+				StartCoroutine(generateEnemy(Phase1Wave1));
 				wave1start = false;
 			}
 
@@ -128,16 +142,21 @@ public class AIManager : MonoBehaviour {
 				ph1on = false;
 				ph2on = true;
 				shop = true;
+				if(ScoreManager.money == moneyCheck && !mission3){
+					mission3 = true;
+					missionAcc.GetComponent<TextMesh>().text = "Mission #3 Complete";
+					missionAcc.GetComponent<Renderer>().enabled = true;
+					StartCoroutine(setDeactive());
+					soundPlayer.SendMessage("missionComplete");
+				}
 			}
 
 		} else if (ph2on && start2) {
 
-			count_tens.GetComponent<TextMesh>().text = (Phase2Total / 10).ToString ();
-			count_ones.GetComponent<TextMesh>().text = (Phase2Total % 10).ToString ();
-
 			if(wave1start){
+				player.GetComponent<HealthBar>().setSpeed (Phase2Total);
+				player.SendMessage ("reset");
 				wave1start = false;
-				soundPlayer.SendMessage ("beatPhase1");
 				StartCoroutine (setPhase2());
 			}
 
@@ -159,13 +178,10 @@ public class AIManager : MonoBehaviour {
 
 		} else if (ph3on && start3) {
 
-			count_tens.GetComponent<TextMesh>().text = (Phase3Total / 10).ToString ();
-			count_ones.GetComponent<TextMesh>().text = (Phase3Total % 10).ToString ();
-
 			if(wave1start){
+				player.GetComponent<HealthBar>().setSpeed (Phase3Total);
+				player.SendMessage ("reset");
 				wave1start = false;
-				soundPlayer.SendMessage ("beatPhase1");
-				soundPlayer.SendMessage ("beatPhase2");
 				StartCoroutine (setPhase3());
 			}
 			
@@ -189,14 +205,10 @@ public class AIManager : MonoBehaviour {
 
 		} else if (ph4on && start4) {
 
-			count_tens.GetComponent<TextMesh>().text = (Phase4Total / 10).ToString ();
-			count_ones.GetComponent<TextMesh>().text = (Phase4Total % 10).ToString ();
-
 			if(wave1start){
+				player.GetComponent<HealthBar>().setSpeed (Phase4Total);
+				player.SendMessage ("reset");
 				wave1start = false;
-				soundPlayer.SendMessage ("beatPhase1");
-				soundPlayer.SendMessage ("beatPhase2");
-				soundPlayer.SendMessage ("beatPhase3");
 				StartCoroutine (setPhase4());
 			}
 			
@@ -220,15 +232,10 @@ public class AIManager : MonoBehaviour {
 			}
 		} else if (ph5on && start5) {
 
-			count_tens.GetComponent<TextMesh>().text = (Phase5Total / 10).ToString ();
-			count_ones.GetComponent<TextMesh>().text = (Phase5Total % 10).ToString ();
-
 			if(wave1start){
 				wave1start = false;
-				soundPlayer.SendMessage ("beatPhase1");
-				soundPlayer.SendMessage ("beatPhase2");
-				soundPlayer.SendMessage ("beatPhase3");
-				soundPlayer.SendMessage ("beatPhase4");
+				player.GetComponent<HealthBar>().setSpeed (Phase5Total);
+				player.SendMessage ("reset");
 				StartCoroutine (setPhase5());
 			}
 			
@@ -247,13 +254,23 @@ public class AIManager : MonoBehaviour {
 			
 			if(Phase5Total == 0){
 				ph5on = false;
+				boss = true;
 				shop = true;
 			}
+		} else if (boss && start6) {
+
+			if(wave1start){
+				wave1start = false;
+				player.GetComponent<HealthBar>().setSpeed (4);
+				player.SendMessage ("reset");
+				StartCoroutine (setBoss());
+			}
+
 		}
 
 	}
 
-	void generateEnemy(int numberOfEnemies){
+	IEnumerator generateEnemy(int numberOfEnemies){
 
 		for (int i = 0; i < numberOfEnemies; i++) {
 			num += 1;
@@ -274,10 +291,13 @@ public class AIManager : MonoBehaviour {
 				Instantiate (enemyPrefab, new Vector3 (sp4.transform.position.x, 4, zpos), Quaternion.identity);
 			}
 
+			randomChoice = Random.Range (4, 10);
+			yield return new WaitForSeconds(randomChoice);
+
 		}
 	}
 
-	void generateTermite(int numberOfEnemies){
+	IEnumerator generateTermite(int numberOfEnemies){
 		
 		for (int i = 0; i < numberOfEnemies; i++) {
 			num += 1;
@@ -297,6 +317,9 @@ public class AIManager : MonoBehaviour {
 				float zpos = sp4.transform.position.z + Random.Range (-4, 5);
 				Instantiate (termitePrefab, new Vector3 (sp4.transform.position.x, 4, zpos), Quaternion.identity);
 			}
+
+			randomChoice = Random.Range (8, 15);
+			yield return new WaitForSeconds(randomChoice);
 			
 		}
 	}
@@ -321,7 +344,7 @@ public class AIManager : MonoBehaviour {
 		yield return new WaitForSeconds(2);
 		ph1.SetActive (false);
 		ph2.SetActive (true);
-		generateEnemy (Phase2Wave1);
+		StartCoroutine(generateEnemy (Phase2Wave1));
 	}
 
 	IEnumerator setPhase3(){
@@ -329,9 +352,7 @@ public class AIManager : MonoBehaviour {
 		ph1.SetActive (false);
 		ph2.SetActive (false);
 		ph3.SetActive (true);
-		generateEnemy (Phase3Wave1-1);
-		yield return new WaitForSeconds (8);
-		generateEnemy (1);
+		StartCoroutine(generateEnemy (3));
 	}
 
 	IEnumerator setPhase4(){
@@ -340,8 +361,8 @@ public class AIManager : MonoBehaviour {
 		ph2.SetActive (false);
 		ph3.SetActive (false);
 		ph4.SetActive (true);
-		generateEnemy (Phase4Wave1Ticks);
-		generateTermite (Phase4Wave1Termites);
+		StartCoroutine(generateEnemy (Phase4Wave1Ticks));
+		StartCoroutine(generateTermite (Phase4Wave1Termites));
 	}
 
 	IEnumerator setPhase5(){
@@ -351,8 +372,20 @@ public class AIManager : MonoBehaviour {
 		ph3.SetActive (false);
 		ph4.SetActive (false);
 		ph5.SetActive (true);
-		generateEnemy (Phase5Wave1Ticks);
-		generateTermite (Phase5Wave1Termites);
+		StartCoroutine(generateEnemy (Phase5Wave1Ticks));
+		StartCoroutine(generateTermite (Phase5Wave1Termites));
+	}
+
+	IEnumerator setBoss(){
+		yield return new WaitForSeconds (2);
+		ph1.SetActive (false);
+		ph2.SetActive (false);
+		ph3.SetActive (false);
+		ph4.SetActive (false);
+		ph5.SetActive (false);
+		boss_not.SetActive (true);
+		soundPlayer.SendMessage ("BossEntrance");
+		Instantiate (bossPrefab, new Vector3 (.02f, 11.13f, -5.84f), Quaternion.identity);
 	}
 
 	void StartPhase(){
@@ -372,6 +405,8 @@ public class AIManager : MonoBehaviour {
 		} else if (phaseCount == 5) {
 			start5 = true;
 			is_safezone = false;
+		} else if (phaseCount == 6) {
+			start6 = true;
 		}
 
 		phaseCount++;
@@ -434,13 +469,13 @@ public class AIManager : MonoBehaviour {
 
 	IEnumerator delayNewEnemy(int numberOfEnemies){
 		yield return new WaitForSeconds(2);
-		generateEnemy (numberOfEnemies);
+		StartCoroutine(generateEnemy (numberOfEnemies));
 		makeEnemy = true;
 	}
 
 	IEnumerator delayNewTermite(int numberOfEnemies){
 		yield return new WaitForSeconds(2);
-		generateTermite (numberOfEnemies);
+		StartCoroutine(generateTermite (numberOfEnemies));
 		makeEnemy = true;	
 	}
 
@@ -479,5 +514,10 @@ public class AIManager : MonoBehaviour {
 			}
 			GUI.EndGroup ();
 		}
+	}
+
+	IEnumerator setDeactive(){
+		yield return new WaitForSeconds (5);
+		missionAcc.GetComponent<Renderer>().enabled = false;
 	}
 }
