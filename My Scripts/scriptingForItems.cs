@@ -13,9 +13,11 @@ public class scriptingForItems : MonoBehaviour {
 	private bool buyArmor = false;
 	private bool incLifeCapacity = false;
 	private bool exit_shop = false;
+	private GameObject soundSystem;
 	// Use this for initialization
 	void Start () {
 		player = GameObject.Find ("player");
+		soundSystem = GameObject.Find ("Main Camera");
 	}
 	
 	// Update is called once per frame
@@ -82,20 +84,35 @@ public class scriptingForItems : MonoBehaviour {
 			GUI.BeginGroup (new Rect ((Screen.width / 2) - Screen.width / 4,
 			                          (Screen.height / 2) - Screen.height / 4, Screen.width / 2,
 			                          Screen.height / 2));
-			GUI.Box (new Rect (0, 0, Screen.width / 2, Screen.height / 2),
-			         "EXTRA LIFE\nCost: $35.\n\n Grants player another heart for survival in\n the arena.\n\n\n" +
-				"Would you like to purchase?");
-	
-			if (GUI.Button (new Rect (120, 150, 75, 50), "YES")) {
-				buyExtraLife = false;
-				player.SendMessage ("GainLife");
-				ScoreManager.money -= 35;
-				player.SendMessage ("disableTalking");
-			}
 
-			if (GUI.Button (new Rect (200, 150, 75, 50), "NO")) {
-				buyExtraLife = false;
-				player.SendMessage ("disableTalking");
+			if (SphereMovement.max_lives == SphereMovement.lives) {
+				GUI.Box (new Rect (0, 0, Screen.width / 2, Screen.height / 2),
+				         "EXTRA LIFE\nCost: $35.\n\n Grants player another heart for survival in\n the arena.\n\n\n" +
+				         "You have exceeded maximum lives and\ncannot purchase.");
+				;
+				
+				if (GUI.Button (new Rect (120, 150, 150, 100), "OK")) {
+					buyExtraLife = false;
+					player.SendMessage ("disableTalking");
+				}
+			}
+			else{
+				GUI.Box (new Rect (0, 0, Screen.width / 2, Screen.height / 2),
+				         "EXTRA LIFE\nCost: $35.\n\n Grants player another heart for survival in\n the arena.\n\n\n" +
+					"Would you like to purchase?");
+
+				if (GUI.Button (new Rect (120, 150, 75, 50), "YES")) {
+					buyExtraLife = false;
+					player.SendMessage ("GainLife");
+					ScoreManager.money -= 35;
+					player.SendMessage ("disableTalking");
+					soundSystem.SendMessage ("itemPurchased");
+				}
+
+				if (GUI.Button (new Rect (200, 150, 75, 50), "NO")) {
+					buyExtraLife = false;
+					player.SendMessage ("disableTalking");
+				}
 			}
 			GUI.EndGroup ();
 		} else if (buyNuke) {
@@ -122,6 +139,7 @@ public class scriptingForItems : MonoBehaviour {
 					SphereMovement.has_nuke = true;
 					ScoreManager.money -= 30;
 					player.SendMessage ("disableTalking");
+					soundSystem.SendMessage ("itemPurchased");
 				}
 				
 				if (GUI.Button (new Rect (200, 150, 75, 50), "NO")) {
@@ -155,6 +173,7 @@ public class scriptingForItems : MonoBehaviour {
 					SphereMovement.has_invincibility = true;
 					ScoreManager.money -= 25;
 					player.SendMessage ("disableTalking");
+					soundSystem.SendMessage ("itemPurchased");
 				}
 				
 				if (GUI.Button (new Rect (200, 150, 75, 50), "NO")) {
@@ -180,6 +199,7 @@ public class scriptingForItems : MonoBehaviour {
 					player.SendMessage ("GainLife");
 				ScoreManager.money -= 250;
 				player.SendMessage ("disableTalking");
+				soundSystem.SendMessage ("itemPurchased");
 			}
 			
 			if (GUI.Button (new Rect (200, 150, 75, 50), "NO")) {

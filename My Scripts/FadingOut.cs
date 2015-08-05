@@ -23,12 +23,13 @@ public class FadingOut : MonoBehaviour {
 		
 		void Update()
 		{    
-			GetComponent<Renderer>().material.color = color;
+		GetComponent<Renderer> ().material.color = color;
 			
-			if(fadeIn && !fadeOut)
+		if (!SphereMovement.paused) {
+			if (fadeIn && !fadeOut)
 				FadeIn ();
 			
-			if(fadeOut && !fadeIn)
+			if (fadeOut && !fadeIn)
 				FadeOut ();
 
 			if (color.a <= minAlpha && !check) {
@@ -36,29 +37,27 @@ public class FadingOut : MonoBehaviour {
 				AIManager.SendMessage ("StartPhase");
 			}
 			
-			if(color.a <= minAlpha && check)
-			{
+			if (color.a <= minAlpha && check) {
 				fadeOut = false;
-			if(Input.GetKeyDown (KeyCode.A) || Input.GetKeyDown (KeyCode.W) || Input.GetKeyDown (KeyCode.D)
-			   || Input.GetKeyDown (KeyCode.S))
-				{
+				if (Input.GetKeyDown (KeyCode.A) || Input.GetKeyDown (KeyCode.W) || Input.GetKeyDown (KeyCode.D)
+					|| Input.GetKeyDown (KeyCode.S) || Input.GetKeyDown (KeyCode.UpArrow) || Input.GetKeyDown
+			   (KeyCode.DownArrow) || Input.GetKeyDown (KeyCode.RightArrow) || Input.GetKeyDown (KeyCode.LeftArrow)) {
 					fadeIn = true;    
 					check = false;
 				}
 
 			}
 			
-			if(color.a >= maxAlpha)
-			{
+			if (color.a >= maxAlpha) {
 				fadeIn = false;
-			if(Input.GetKeyDown (KeyCode.A) || Input.GetKeyDown (KeyCode.W) || Input.GetKeyDown (KeyCode.D)
-			   || Input.GetKeyDown (KeyCode.S))
-				{
+				if (Input.GetKeyDown (KeyCode.A) || Input.GetKeyDown (KeyCode.W) || Input.GetKeyDown (KeyCode.D)
+					|| Input.GetKeyDown (KeyCode.S) || Input.GetKeyDown (KeyCode.UpArrow) || Input.GetKeyDown
+			   (KeyCode.DownArrow) || Input.GetKeyDown (KeyCode.RightArrow) || Input.GetKeyDown (KeyCode.LeftArrow)) {
 					fadeOut = true;    
 				}
 			}
 		}
-		
+	}
 		void FadeIn()
 		{
 			color.a += fadeSpeed;

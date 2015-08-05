@@ -97,7 +97,7 @@ public class AIManager : MonoBehaviour {
 	private GameObject count_ones;
 	private GameObject missionSystem;
 	private GameObject missionAcc;
-
+	private GameObject scoreManage;
 	// Use this for initialization
 	void Start () {
 		player = GameObject.Find ("player");
@@ -107,6 +107,7 @@ public class AIManager : MonoBehaviour {
 		missionSystem = GameObject.Find ("MissionSystem");
 		missionAcc = GameObject.Find ("mission_acc");
 		moneyCheck = ScoreManager.money;
+		scoreManage = GameObject.Find ("ScoreManager");
 	}
 	
 	// Update is called once per frame
@@ -154,6 +155,7 @@ public class AIManager : MonoBehaviour {
 		} else if (ph2on && start2) {
 
 			if(wave1start){
+				scoreManage.SendMessage ("storeScore");
 				player.GetComponent<HealthBar>().setSpeed (Phase2Total);
 				player.SendMessage ("reset");
 				wave1start = false;
@@ -179,6 +181,7 @@ public class AIManager : MonoBehaviour {
 		} else if (ph3on && start3) {
 
 			if(wave1start){
+				scoreManage.SendMessage ("storeScore");
 				player.GetComponent<HealthBar>().setSpeed (Phase3Total);
 				player.SendMessage ("reset");
 				wave1start = false;
@@ -206,6 +209,7 @@ public class AIManager : MonoBehaviour {
 		} else if (ph4on && start4) {
 
 			if(wave1start){
+				scoreManage.SendMessage ("storeScore");
 				player.GetComponent<HealthBar>().setSpeed (Phase4Total);
 				player.SendMessage ("reset");
 				wave1start = false;
@@ -233,6 +237,7 @@ public class AIManager : MonoBehaviour {
 		} else if (ph5on && start5) {
 
 			if(wave1start){
+				scoreManage.SendMessage ("storeScore");
 				wave1start = false;
 				player.GetComponent<HealthBar>().setSpeed (Phase5Total);
 				player.SendMessage ("reset");
@@ -256,10 +261,18 @@ public class AIManager : MonoBehaviour {
 				ph5on = false;
 				boss = true;
 				shop = true;
+				if(ScoreManager.score >= 2000 && !AIManager.mission1){
+					AIManager.mission1 = true;
+					missionAcc.GetComponent<TextMesh>().text = "Mission #1 Complete";
+					missionAcc.GetComponent<Renderer>().enabled = true;
+					StartCoroutine(setDeactive());
+					soundPlayer.SendMessage("missionComplete");
+				}
 			}
 		} else if (boss && start6) {
 
 			if(wave1start){
+				scoreManage.SendMessage ("storeScore");
 				wave1start = false;
 				player.GetComponent<HealthBar>().setSpeed (4);
 				player.SendMessage ("reset");

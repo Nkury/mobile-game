@@ -137,7 +137,7 @@ public class SphereMovement : MonoBehaviour {
 		} else if (lives > 5) {
 			life1.SetActive(true);
 			lifemultiplier.SetActive (true);
-			lifemultiplier.GetComponent<Text>().text = "x " + (lives+1);
+			lifemultiplier.GetComponent<Text>().text = "x " + (lives);
 		}
 
 		

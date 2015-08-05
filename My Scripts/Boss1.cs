@@ -8,6 +8,7 @@ public class Boss1 : MonoBehaviour {
 	private ParticleSystem bigExplosion;
 	private GameObject soundSystem;
 	public GameObject AIManage;
+	private GameObject scoreManage;
 	public float rotateSpeed = 60f;
 	public Material goodTexture;
 	public Material badTexture;
@@ -30,6 +31,7 @@ public class Boss1 : MonoBehaviour {
 	void Awake(){
 		targetObj = GameObject.Find ("player");
 		AIManage = GameObject.Find ("AIManager");
+		scoreManage = GameObject.Find ("ScoreManager");
 		explosion = (ParticleSystem)Resources.Load ("prefabs/explosion", typeof(ParticleSystem));
 		bigExplosion = (ParticleSystem)Resources.Load ("prefabs/boss_explosion", typeof(ParticleSystem));
 	}
@@ -126,6 +128,7 @@ public class Boss1 : MonoBehaviour {
 			attacking = true;
 		} else {
 			attacking = false;
+			soundSystem.SendMessage ("BossDead");
 			soundSystem.SendMessage ("DeadEnemy");
 			Object expl = Instantiate (explosion, transform.position, Quaternion.identity);
 			Destroy (expl, 3);
@@ -166,15 +169,7 @@ public class Boss1 : MonoBehaviour {
 			soundSystem.SendMessage ("DeadEnemy");
 			yield return new WaitForSeconds (.25f);
 			soundSystem.SendMessage ("DeadEnemy");
-			ScoreManager.money += 100;
-			ScoreManager.score += 500;
-			if(ScoreManager.score >= 2500 && !AIManager.mission1){
-				AIManager.mission1 = true;
-				missionAcc.GetComponent<TextMesh>().text = "Mission #1 Complete";
-				missionAcc.GetComponent<Renderer>().enabled = true;
-				StartCoroutine(setDeactive());
-				soundSystem.SendMessage("missionComplete");
-			}
+			scoreManage.SendMessage("BeatLevel");
 			Destroy (gameObject);
 		}
 	}
@@ -266,8 +261,4 @@ public class Boss1 : MonoBehaviour {
 		attacking = true;
 	}
 
-	IEnumerator setDeactive(){
-		yield return new WaitForSeconds (5);
-		missionAcc.GetComponent<Renderer>().enabled = false;
-	}
 }

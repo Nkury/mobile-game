@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 
 public class TickAttack : MonoBehaviour {
@@ -13,6 +13,11 @@ public class TickAttack : MonoBehaviour {
 	private bool flicker = false;
 	private int interval = 1;
 	private Color color;
+	private Vector3 playerPrevPos;
+
+	private bool dash = true;
+	private bool dashTime = true;
+	private bool goToCenter = false;
 
 	void Start(){
 		soundSystem = GameObject.Find ("Sound System");
@@ -45,11 +50,44 @@ public class TickAttack : MonoBehaviour {
 			GetComponent<Renderer>().enabled = true;
 	
 		if (attacking == true && visible == true) {
-			float distance = Vector3.Distance(targetObj.transform.position, transform.position);
-			Vector3 direction = Vector3.Normalize(targetObj.transform.position - transform.position);
-			transform.position += direction * Time.deltaTime * 2.4f;
-			Quaternion rotation = Quaternion.LookRotation(direction);
-			transform.rotation = rotation;
+			if (goToCenter) {
+
+				if(dashTime){
+					dashTime = false;
+					GetComponent<Renderer>().material.color = new Color(1, 1, 0);
+				}
+
+				if(!((transform.position.x < (playerPrevPos.x + .05f) && transform.position.x > (playerPrevPos.x - .05f))
+				   || (transform.position.z < (playerPrevPos.z + .1f) && transform.position.z > (playerPrevPos.z - .1f)))){
+					Vector3 direction = Vector3.Normalize (new Vector3(playerPrevPos.x, transform.position.y,
+					                                                   playerPrevPos.z) - transform.position);
+					transform.position += direction * Time.deltaTime * 5;
+				}
+				else{
+					goToCenter = false;
+					dashTime = true;
+				}
+			} else {
+				float distance = Vector3.Distance (targetObj.transform.position, transform.position);
+				Vector3 direction = Vector3.Normalize (targetObj.transform.position - transform.position);
+				Quaternion rotation = Quaternion.LookRotation (direction);
+				transform.rotation = rotation;
+				if (dash) {
+					transform.position += direction * Time.deltaTime * 2.7f;
+					if (dashTime) {
+						dashTime = false;
+						GetComponent<Renderer> ().material.color = color;
+						StartCoroutine (Dash ());
+					}			
+				} else {
+					transform.position += direction * Time.deltaTime * 2;
+					if (!dashTime) {
+						dashTime = true;
+						GetComponent<Renderer> ().material.color = new Color (1, .5f, 0);
+						StartCoroutine (Dash ());
+					}
+				}
+			}
 		}
 	}
 
@@ -66,6 +104,18 @@ public class TickAttack : MonoBehaviour {
 		}
 	}
 
+	IEnumerator Dash(){
+		int rand = Random.Range (3, 10);
+		if (!dashTime)
+			yield return new WaitForSeconds (rand);
+		else {
+			yield return new WaitForSeconds (rand);
+			playerPrevPos = targetObj.transform.position;
+			goToCenter = true;
+		}
+		dash = !dash;
+	}
+
 	void DestroySelf(){
 		soundSystem.SendMessage ("DeadEnemy");
 		targetObj.GetComponent<HealthBar> ().newLimit ();
@@ -76,6 +126,7 @@ public class TickAttack : MonoBehaviour {
 	}
 
 	void Flicker(){
+		GetComponent<AudioSource> ().Play ();
 		flicker = true;
 	}
 	

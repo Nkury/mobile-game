@@ -11,6 +11,8 @@ public class TermiteAttack : MonoBehaviour {
 	public GameObject AIManage;
 	public bool visible;
 	public bool attacking;
+	private bool disappear = false;
+	private bool entered = true;
 	private GameObject MissionAcc;
 	private bool flicker = false;
 	private Color color;
@@ -33,35 +35,51 @@ public class TermiteAttack : MonoBehaviour {
 	void Update(){
 		interval++;
 
-		if (interval % 300 == 0) 
-			visible = false;
-
-		
 		if (interval % 7 == 0 && flicker) {
 			GetComponent<Renderer> ().material.color = new Color (0, 1, 1);
 		} else if (flicker) {
 			GetComponent<Renderer> ().material.color = color;
 		}
 
-		if (visible == false) {
+		if (interval % 4 == 0 && disappear) {
+			GetComponent<Renderer> ().enabled = true;
+		} else if (disappear) {
 			GetComponent<Renderer> ().enabled = false;
-			StartCoroutine(BeVisible());
 		}
-		else
-			GetComponent<Renderer>().enabled = true;
+
+		if (visible == false && !entered) {
+			entered = true;
+			GetComponent<Renderer> ().enabled = false;
+			StartCoroutine (BeVisible ());
+		} else if(visible == true && entered) {
+			entered = false;
+			GetComponent<Renderer> ().enabled = true;
+			StartCoroutine (BeVisible ());
+		}
 		
 		if (attacking == true && visible == true) {
 			float distance = Vector3.Distance(targetObj.transform.position, transform.position);
-			Vector3 direction = Vector3.Normalize(targetObj.transform.position - transform.position);
-			transform.position += direction * Time.deltaTime * 3;
+			Vector3 direction = Vector3.Normalize(targetObj.transform.position - transform.position );
+			if(distance < 3)
+				transform.position += direction * Time.deltaTime * 3.3f;
+			else
+				transform.position += direction * Time.deltaTime * 2.7f;
 			Quaternion rotation = Quaternion.LookRotation(direction);
 			transform.rotation = rotation;
 		}
 	}
 
 	IEnumerator BeVisible(){
-		yield return new WaitForSeconds (2);
-		visible = true;
+		int rand = Random.Range (4, 7);
+		yield return new WaitForSeconds (rand);
+		if (!entered) {
+			disappear = true;
+			attacking = false;
+			yield return new WaitForSeconds (1.5f);
+			disappear = false;
+			attacking = true;
+		}
+		visible = !visible;
 	}
 
 	void OnTriggerEnter(Collider other){
@@ -98,6 +116,7 @@ public class TermiteAttack : MonoBehaviour {
 
 	
 	void Flicker(){
+		GetComponent<AudioSource> ().Play ();
 		flicker = true;
 	}
 	

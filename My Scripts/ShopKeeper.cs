@@ -13,7 +13,7 @@ public class ShopKeeper : MonoBehaviour {
 	public string[] dialogue = {"Hi there!",
 		"Yeah, over here!",
 		"Hi! Welcome to the shop. My name's Mars.\n Press SPACE", 
-		"We have items from extra lives to armor to nukes! \n Press SPACE", 
+		"We have items from extra lives to potions to nukes! \n Press SPACE", 
 		"Step on a pedestal to purchase an item!\n Press SPACE",
 		"You better bring some money, though.",
 		"Oh, and don't mind the mess. Happy shopping!\n Press SPACE"
